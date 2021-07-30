@@ -6,7 +6,7 @@ run();
 
 function run() {
   getDBConnection()
-    .then((dbConnection) => null)
+    .then((dbConnection) => getAllInsults())
     .catch(() => {
       console.log("DB Connection failed");
     });
@@ -28,6 +28,20 @@ function getDBConnection() {
       resolve(db);
     });
   });
+}
+
+async function getAllInsults(){
+  const Insult = mongoose.model("Insult", schemas.insultSchema, "insultDB");
+  const filter = {};
+
+  const results = await Insult.find(filter);
+
+  const insultList = []
+  for(const insultItem of results){
+    insultList.push(insultItem.insult)
+  }
+
+  console.log(insultList)
 }
 
 function addInsult(insult) {
