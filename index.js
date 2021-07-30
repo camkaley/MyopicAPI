@@ -1,5 +1,7 @@
+const DB = require("./Config/DBConfig")
+
 const mongoose = require('mongoose');
-mongoose.connect('mongodb://127.0.0.1:27017/insultdb', {useNewUrlParser: true, useUnifiedTopology: true});
+mongoose.connect(DB.dbUrl, {useNewUrlParser: true, useUnifiedTopology: true});
 
 const db = mongoose.connection;
 db.on('error', console.error.bind(console, 'connection error:'));
