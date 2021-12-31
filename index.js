@@ -1,54 +1,55 @@
-const config = require("./Config/DBConfig");
-const schemas = require("./Config/DBSchemas")
+const dbConfig = require("./config/databaseConf")
 const mongoose = require("mongoose");
+const cors = require('cors');
+var express = require("express");
+var app = express();
 
-run();
+app.use(cors());
+app.options('*', cors());
 
-function run() {
-  getDBConnection()
-    .then((dbConnection) => getAllInsults())
-    .catch(() => {
-      console.log("DB Connection failed");
-    });
-}
+mongoose.connect(dbConfig.dbUrl, {});
+var Insult = mongoose.model("Insult", dbConfig.newInsultSchema)
 
-function getDBConnection() {
-  return new Promise((resolve, reject) => {
-    mongoose.connect(`${config.dbURL}`, {
-      useNewUrlParser: true,
-      useUnifiedTopology: true,
-    });
-    const db = mongoose.connection;
+app.use(express.json());
+app.listen(4000, () => {
+  console.log("Server running on port 4000");
+});
 
-    db.on("error", function () {
-      reject(null);
-    });
+app.get("/insults", (req, res) => {
+    getInsults(res)
+})
 
-    db.once("open", function () {
-      resolve(db);
-    });
-  });
-}
-
-async function getAllInsults(){
-  const Insult = mongoose.model("Insult", schemas.insultSchema, "insultDB");
-  const filter = {};
-
-  const results = await Insult.find(filter);
-
-  const insultList = []
-  for(const insultItem of results){
-    insultList.push(insultItem.insult)
+app.post("/register", (req, res, next) => {
+  if (req.body) {
+    register(req.body, res)
+  } else {
+    res.sendStatus(400);
   }
+});
 
-  console.log(insultList)
+async function getInsults(res) {
+    Insult.find().then(insultList => {
+        res.json(formatList(insultList))
+    })
 }
 
-function addInsult(insult) {
-  const Insult = mongoose.model("Insult", schemas.insultSchema, "insultDB");
-  const newInsult = new Insult({insult: insult});
-  newInsult.save(function(err, insult){
-    if(err) console.log(err);
-    console.log("Insult added to DB")
-  })
+function formatList(insultList) {
+    console.log(insultList)
+    var formattedList = []
+    insultList.map(insult => {
+        formattedList.push({id: insult.id, insult: insult.insult})
+    })
+
+    return formattedList;
 }
+
+function register(body, response) {
+    Insult.find().then(res => {
+        var id = res.length + 1
+        var newInsult = new Insult({id: `${id}`, insult: body.insult})
+        newInsult.save()
+        response.sendStatus(200)
+    })
+}
+
+
