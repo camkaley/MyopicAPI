@@ -1,5 +1,5 @@
 const mongoose = require("mongoose");
-const dbUrl = "mongodb://127.0.0.1:27017/Myopic"
+const dbUrl = "mongodb+srv://admin:cia5wqod@cluster0.jcuki.mongodb.net/Myopic?retryWrites=true&w=majority"
 
 const newInsultSchema = new mongoose.Schema({
     id: {type: String},
